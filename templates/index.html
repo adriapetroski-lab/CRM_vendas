@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM de Vendas com Gráfico</title>
+    <!-- Importação da biblioteca do gráfico (Chart.js) -->
+    <script src="https://jsdelivr.net"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background-color: #f4f4f9; }
+        h1, h2 { color: #333; }
+        .container { display: flex; flex-wrap: wrap; gap: 30px; margin-bottom: 30px; }
+        form, .box-grafico { background: white; padding: 20px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex: 1; min-width: 300px; }
+        .box-grafico { max-width: 400px; display: flex; flex-direction: column; align-items: center; }
+        input, select, button { display: block; margin: 10px 0; padding: 8px; width: 100%; max-width: 300px; }
+        button { background-color: #28a745; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #218838; }
+        table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #007bff; color: white; }
+        tr:hover { background-color: #f1f1f1; }
+    </style>
+</head>
+<body>
+
+    <h1>🚀 Meu CRM de Vendas</h1>
+    
+    <div class="container">
+        <!-- Formulário para Adicionar novos Leads -->
+        <form action="/adicionar" method="POST">
+            <h2>Cadastrar Novo Lead</h2>
+            <label>Nome:</label>
+            <input type="text" name="nome" required placeholder="Ex: João Silva">
+            
+            <label>E-mail:</label>
+            <input type="email" name="email" required placeholder="Ex: joao@email.com">
+            
+            <label>Status da Venda:</label>
+            <select name="status">
+                <option value="Prospecção">Prospecção</option>
+                <option value="Contato Inicial">Contato Inicial</option>
+                <option value="Negociação">Negociação</option>
+                <option value="Ganho">Ganho (Venda Fechada)</option>
+                <option value="Perdido">Perdido</option>
+            </select>
+            
+            <button type="submit">Salvar Cliente</button>
+        </form>
+
+        <!-- Espaço reservado para o Gráfico Visual -->
+        <div class="box-grafico">
+            <h2>Funil Visual de Vendas</h2>
+            <canvas id="graficoFunil" width="300" height="300"></canvas>
+        </div>
+    </div>
+
+    <!-- Tabela de Clientes -->
+    <h2>📋 Lista de Clientes</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>E-mail</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cliente in clientes %}
+            <tr>
+                <td>{{ cliente.nome }}</td>
+                <td>{{ cliente.email }}</td>
+                <td><strong>{{ cliente.status }}</strong></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Script que renderiza o gráfico de Pizza/Funil -->
+    <script>
+        const ctx = document.getElementById('graficoFunil').getContext('2d');
+        const graficoFunil = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: {{ etapas | tojson }},
+                datasets: [{
+                    label: 'Clientes por Etapa',
+                    data: {{ dados_grafico | tojson }},
+                    backgroundColor: [
+                        '#ffc107', // Amarelo (Prospecção)
+                        '#17a2b8', // Azul Claro (Contato)
+                        '#007bff', // Azul Escuro (Negociação)
+                        '#28a745', // Verde (Ganho)
+                        '#dc3545'  // Vermelho (Perdido)
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
