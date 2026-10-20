@@ -1,0 +1,41 @@
+python
+from flask import Flask, render_template, request, redirect, url_for
+from collections import Counter
+
+app = Flask(__name__)
+
+# Banco de dados simulado em memória
+clientes = [
+    {"nome": "Ana Silva", "email": "ana@email.com", "status": "Prospecção"},
+    {"nome": "Carlos Souza", "email": "carlos@email.com", "status": "Negociação"},
+    {"nome": "Mariana Costa", "email": "mariana@email.com", "status": "Ganho"},
+    {"nome": "Lucas Lima", "email": "lucas@email.com", "status": "Prospecção"}
+]
+
+@app.route('/')
+def index():
+    # Conta quantos clientes existem em cada status automaticamente
+    contagem_status = Counter(c['status'] for c in clientes)
+    
+    # Define as etapas padrão do funil de vendas
+    etapas = ["Prospecção", "Contato Inicial", "Negociação", "Ganho", "Perdido"]
+    
+    # Cria uma lista ordenada com os valores correspondentes a cada etapa (ex: [2, 0, 1, 1, 0])
+    dados_grafico = [contagem_status[etapa] for etapa in etapas]
+
+    return render_template('index.html', clientes=clientes, etapas=etapas, dados_grafico=dados_grafico)
+
+@app.route('/adicionar', methods=['POST'])
+def adicionar_cliente():
+    nome = request.form.get('nome')
+    email = request.form.get('email')
+    status = request.form.get('status')
+    
+    if nome and email:
+        clientes.append({"nome": nome, "email": email, "status": status})
+        
+    return redirect(url_for('index'))
+
+if __name__ == '__main__':
+    app.run(debug=True)
+    
